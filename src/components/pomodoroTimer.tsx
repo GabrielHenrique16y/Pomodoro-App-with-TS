@@ -1,11 +1,10 @@
-import React, { JSX, useEffect, useState, useCallback } from "react";
+import { JSX, useEffect, useState, useCallback } from "react";
 import { useInterval } from "../hooks/use-interval";
 import { Timer } from "./timer";
 import { Button } from "./button";
 
 import bell_start from '../sounds/bell-start.mp3';
 import bell_finish from '../sounds/bell-finish.mp3';
-import { secondsToMinutes } from "../utils/secondsToMinutes";
 import { secondsToTime } from "../utils/secondsToTime";
 
 interface Props {
