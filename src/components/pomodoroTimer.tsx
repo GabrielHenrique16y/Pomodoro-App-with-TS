@@ -15,23 +15,50 @@ interface Props {
 }
 
 export function PomodoroTimer(props: Props): JSX.Element{
-    const [mainTime, setMainTime] = useState(props.pomodoroTime);
+    const [mainTime, setMainTime] = useState(
+        () => Number(localStorage.getItem('mainTime')) || props.pomodoroTime
+    );    
     const [timeCounting, setTimeCounting] = useState(false);
     const [working, setWorking] = useState(false);
     const [resting, setResting] = useState(false);
 
     const [cyclesQntManager, setCyclesQntManager] = useState(new Array(props.cycles - 1).fill(true));
 
-    const [completedCycles, setCompletedCycles] = useState(0);
-    const [fullWorkingTime, setFullWorkingTime] = useState(0);
-    const [numberOfPomodoros, setNumberOfPomodoros] = useState(0);
+    const [completedCycles, setCompletedCycles] = useState(
+        () => Number(localStorage.getItem('completedCycles')) || 0);
+    const [fullWorkingTime, setFullWorkingTime] = useState(
+        () => Number(localStorage.getItem('fullWorkingTime')) || 0);
+    const [numberOfPomodoros, setNumberOfPomodoros] = useState(
+        () => Number(localStorage.getItem('NumberOfPomodoro')) || 0);
 
     const workingStartSound = new Audio(bell_start);
     const workingStopSound = new Audio(bell_finish);
 
+    const STORAGE_DATE_KEY = 'app_last_open_date';
+
+    useEffect(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const lastOpenDate = localStorage.getItem(STORAGE_DATE_KEY);
+        if (lastOpenDate !== today) {
+            localStorage.clear();
+            localStorage.setItem(STORAGE_DATE_KEY, today);
+        
+            setMainTime(props.pomodoroTime);
+            setFullWorkingTime(0);
+            setNumberOfPomodoros(0);
+            setCompletedCycles(0);
+            setCyclesQntManager(new Array(props.cycles - 1).fill(true));
+            setTimeCounting(false);
+            setWorking(false);
+            setResting(false);
+        }
+    }, [props.pomodoroTime, props.cycles]);
+
     useInterval(() => {
         setMainTime(mainTime - 1);
+        localStorage.setItem('mainTime', (mainTime - 1).toString());
         if(working) setFullWorkingTime(fullWorkingTime + 1)
+        localStorage.setItem('fullWorkingTime', (fullWorkingTime + 1).toString());
     }, timeCounting ? 1000 : null)
 
     const configureWork = useCallback(() => {
@@ -67,15 +94,19 @@ export function PomodoroTimer(props: Props): JSX.Element{
             configureRest(true);
             setCyclesQntManager(new Array(props.cycles - 1).fill(true))
             setCompletedCycles(completedCycles + 1)
+            localStorage.setItem('completedCycles', (completedCycles + 1).toString())
         }
 
-        if(working) setNumberOfPomodoros(numberOfPomodoros + 1);
+        if(working) {
+            setNumberOfPomodoros(numberOfPomodoros + 1);
+            localStorage.setItem('NumberOfPomodoro', (numberOfPomodoros + 1).toString())
+        }
         if(resting) configureWork()
     }, [working, resting, cyclesQntManager, mainTime, props.cycles, completedCycles, configureRest, configureWork, numberOfPomodoros])
 
     return ( 
         <div className="pomodoro">
-            <h2>You are: Working</h2>
+            <h2>Você está: {working ? 'Trabalhando' : 'Descansando'}</h2>
             <Timer mainTime={mainTime}/>
             <div className="display_buttons">
                 <Button text={working ? 'Reset' : 'Work'} onClick={() => configureWork()} className="work_btn"/>
