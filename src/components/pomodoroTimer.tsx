@@ -6,6 +6,7 @@ import { Button } from "./button";
 import bell_start from '../sounds/bell-start.mp3';
 import bell_finish from '../sounds/bell-finish.mp3';
 import { secondsToTime } from "../utils/secondsToTime";
+import { ConfigPomodoro } from "./configPomodoro";
 
 interface Props {
     pomodoroTime: number;
@@ -106,7 +107,10 @@ export function PomodoroTimer(props: Props): JSX.Element{
 
     return ( 
         <div className="pomodoro">
-            <h2>Você está: {working ? 'Trabalhando' : 'Descansando'}</h2>
+            <div className="pomodoroText">
+                <h3><ConfigPomodoro /></h3>
+                <h2>Você está: {working ? 'Trabalhando' : 'Descansando'}</h2>
+            </div>
             <Timer mainTime={mainTime}/>
             <div className="display_buttons">
                 <Button text={working ? 'Reset' : 'Work'} onClick={() => configureWork()} className="work_btn"/>
